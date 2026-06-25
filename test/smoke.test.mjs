@@ -1,0 +1,10 @@
+// size-fitter — smoke test（node:test 標準ランナー）
+// 外部テストランナー（jest/vitest）は導入しない。Node 22+ 同梱の node:test を使う。
+// 実行: pnpm test (= node --test)
+import { test } from "node:test";
+import assert from "node:assert/strict";
+
+test("slug is a non-empty string", () => {
+  const slug = "size-fitter";
+  assert.ok(typeof slug === "string" && slug.length > 0);
+});
