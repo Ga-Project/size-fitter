@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Script from "next/script";
 import "./globals.css";
 
 export const metadata = {
@@ -11,16 +12,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ja">
       <body>
-        {/*
-          analytics（公開直前に1つ有効化・cookieless・秘密キー不要）:
-          有効化時は `import Script from "next/script"` を併せて追加し、以下を render する
-          （next/script はハイドレーション安全・@next/next/no-sync-scripts 準拠）:
-          (1) GoatCounter（第一候補・GitHub Pages/汎用ホスティングで配信可能）
-          <Script data-goatcounter="https://__GC_CODE__.goatcounter.com/count" strategy="afterInteractive" src="https://gc.zgo.at/count.js" />
-          (2) Cloudflare Web Analytics（副次）
-          <Script strategy="afterInteractive" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"__CF_BEACON_TOKEN__"}' />
-        */}
         {children}
+        {/* analytics: GoatCounter（cookieless・秘密キー不要・公開タグ）。next/script で afterInteractive 注入。 */}
+        <Script
+          data-goatcounter="https://ga-size-fitter.goatcounter.com/count"
+          src="https://gc.zgo.at/count.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
