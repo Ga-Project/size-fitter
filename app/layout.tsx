@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Script from "next/script";
 import "./globals.css";
+import "./theme.css";
 
 export const metadata = {
   title: "海外サイズ逆引きフィッター | US/EU/UK/JP サイズ換算",

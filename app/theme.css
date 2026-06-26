@@ -1,0 +1,507 @@
+/* size-fitter — per-product テーマ層（製品の "顔" をここで作る）
+ *
+ * globals.css は共通の構造・a11y・コンポーネント挙動を持つ "出発点"。
+ * このファイルは globals.css の後に読み込まれ、:root トークンを上書きして
+ * 製品固有の個性（色・温度感・形・密度・タイポ）を与え、さらにこの製品専用の
+ * コンポーネント（セグメント切替・寸法入力・標準サイズグリッド・ブランド表）を足す。
+ *
+ * ■ この製品の世界観
+ *   「ファッション／リテールの洗練・モダンでクリーン・信頼できる採寸」。
+ *   ルックブックやアトリエの採寸チャートのような、静かで上質・精密な印象。
+ *   → クールなアイボリー/スレートの紙地 ＋ 落ち着いたインク・デニムブルーの差し色 ＋
+ *     控えめな角丸（仕立てられた構造感）＋ 見出しに上品なセリフ（エディトリアル）。
+ *   汎用 bootstrap 青ではなく、彩度を抑えた "藍／デニム" の確かな青で信頼を表す。
+ *
+ * ■ アクセシビリティ（出荷前検証済み・全て WCAG AA 以上）
+ *   light: accent vs white 6.78 / accent vs bg 6.69 / std値 accent vs tint 6.11 /
+ *          text-dim vs bg 5.54 / text-soft vs bg 8.84 / text vs bg 16.2
+ *   dark : accent vs bg 6.73 / accent-fg vs accent 6.67 / text-dim vs bg 7.21 / text vs bg 16.1
+ *   システム表記バッジ（US/EU/UK/JP）は中立面＋text-soft で対比 8.8 以上。
+ *
+ * ■ 思想: 構造クラス（.btn / .card / .hero / .badge …）の見た目は個別に
+ *   書き換えず、トークンで個性を出す。この製品固有の UI だけを下で定義する。
+ */
+
+:root {
+  /* ===== accent: HSL を 1 か所で定義（tint/shade は globals が自動派生） ===== */
+  /* 落ち着いた藍・デニムブルー。彩度を抑え、確かさ・採寸の精密さを表す。 */
+  --accent-h: 224;
+  --accent-s: 48%;
+  --accent-l: 44%;
+  --accent-fg: #ffffff;
+
+  /* ===== neutral: クールなスレート（清潔・整然・リテールの精度感） ===== */
+  --neutral-hue: 222;
+  --neutral-chroma: 12%;
+
+  /* ===== 形・密度: 控えめの角丸＝仕立てられた構造感。標準的な密度。 ===== */
+  --radius-sm: 8px;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --density: 1;
+
+  /* ===== タイポ: 見出しのみ上品なセリフ（エディトリアル／ルックブックの香り）。
+     本文はクリーンなサンスのまま読みやすさを保つ。 ===== */
+  --font-display:
+    "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", "Times New Roman",
+    serif;
+
+  /* ===== 製品固有: 標準サイズグリッドの強調枠（accent を帯びた淡い面） ===== */
+  --measure-line: hsl(var(--accent-h) 30% 78%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --measure-line: hsl(var(--accent-h) 30% 36%);
+  }
+}
+
+/* =========================================================================
+ * 製品固有コンポーネント
+ *   構造（.btn/.card/.field/.input 等）は globals に従う。ここではこの
+ *   ツール特有の UI（セグメント切替・寸法スライダー・標準グリッド・ブランド表・
+ *   状態表示）だけを、上のトークンに連動する形で定義する。
+ * ========================================================================= */
+
+/* ---- ページ容器（globals の .container と別に、ツール本体は読み物幅に絞る） ---- */
+.page {
+  width: 100%;
+  max-width: 60rem;
+  margin-inline: auto;
+  padding-inline: var(--sp-6);
+}
+.tool {
+  width: 100%;
+  max-width: 46rem;
+  margin-inline: auto;
+}
+
+/* ---- hero 内のミニ・サイズチップ（世界観の装飾＝US/EU/UK/JP の対比を見せる） ---- */
+.hero-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-top: var(--sp-6);
+}
+.hero-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-xs);
+  font-size: var(--fs-sm);
+}
+.hero-chip .hero-chip-region {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.hero-chip .hero-chip-value {
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* hero の信頼バッジ（無料・登録不要・ブラウザ内） */
+.hero-trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+  margin-top: var(--sp-6);
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+}
+.hero-trust span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.hero-trust svg {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* ---- セグメント切替（カテゴリ・入力方法のタブ） ---- */
+.seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+  padding: var(--sp-1);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.seg-2 {
+  display: flex;
+  width: 100%;
+}
+.seg-2 .seg-btn {
+  flex: 1;
+}
+.seg-btn {
+  appearance: none;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-soft);
+  padding: var(--sp-2) var(--sp-4);
+  min-height: 40px;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--transition),
+    color var(--transition),
+    box-shadow var(--transition);
+}
+.seg-btn:hover:not(.is-active) {
+  color: var(--text);
+  background: var(--surface-2);
+}
+.seg-btn.is-active {
+  background: var(--surface);
+  color: var(--accent);
+  font-weight: var(--fw-semibold);
+  box-shadow: var(--shadow-xs);
+  border-color: var(--border);
+}
+
+/* ---- フィールド微調整（globals .field を踏襲・ラベル名互換） ---- */
+.field-label {
+  display: block;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text-soft);
+  margin-bottom: var(--sp-2);
+}
+.tool .field {
+  margin-bottom: var(--sp-6);
+}
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-4);
+}
+
+/* ---- 寸法入力（数値 + スライダー） ---- */
+.cm-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+.cm-input {
+  width: 9rem;
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+  padding: var(--sp-3) var(--sp-4);
+  min-height: 48px;
+  color: var(--text);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition),
+    background var(--transition);
+}
+.cm-input:hover {
+  border-color: var(--border-strong);
+}
+.cm-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--bg);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+.cm-range {
+  flex: 1;
+  accent-color: var(--accent);
+  min-height: 44px;
+  cursor: pointer;
+}
+.select {
+  width: 100%;
+}
+.help {
+  color: var(--text-dim);
+  font-size: var(--fs-xs);
+  margin: var(--sp-2) 0 0;
+}
+
+/* ---- 結果ブロック ---- */
+.result {
+  margin-top: var(--sp-2);
+  border-top: 1px solid var(--border);
+  padding-top: var(--sp-6);
+  animation: result-in var(--transition-slow) var(--ease);
+}
+@keyframes result-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* clamped 警告（globals .alert-warn 相当をこの製品の文脈で） */
+.warn {
+  display: flex;
+  gap: var(--sp-3);
+  align-items: flex-start;
+  background: var(--warn-tint);
+  color: var(--warn);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  margin: 0 0 var(--sp-5);
+}
+
+/* ---- 標準サイズグリッド（この製品の主役・"採寸チャート" の見せ場） ---- */
+.std {
+  position: relative;
+  background:
+    linear-gradient(
+      180deg,
+      var(--accent-tint),
+      hsl(var(--accent-h) calc(var(--accent-s) - 16%) 97%)
+    );
+  border: 1px solid var(--measure-line);
+  border-radius: var(--radius);
+  padding: var(--sp-5);
+  margin-bottom: var(--sp-6);
+}
+@media (prefers-color-scheme: dark) {
+  .std {
+    background: var(--accent-tint);
+  }
+}
+.std-cap {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: var(--sp-4);
+}
+.std-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-3);
+}
+.std-cell {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--sp-3) var(--sp-2);
+  text-align: center;
+  box-shadow: var(--shadow-xs);
+}
+.std-region {
+  display: block;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: var(--sp-1);
+}
+.std-value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  line-height: 1.1;
+}
+.std-cm {
+  display: block;
+  margin-top: var(--sp-4);
+  font-size: var(--fs-sm);
+  color: var(--text-soft);
+  font-variant-numeric: tabular-nums;
+}
+.std-cm strong {
+  color: var(--accent);
+  font-weight: var(--fw-bold);
+}
+
+/* ---- ブランド逆引き表 ---- */
+.brands-cap {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: var(--sp-3);
+}
+.brands {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--fs-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.brands th,
+.brands td {
+  text-align: left;
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.brands thead th {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-dim);
+  background: var(--surface-2);
+}
+.brands tbody tr:last-child td {
+  border-bottom: none;
+}
+.brands tbody tr {
+  transition: background var(--transition);
+}
+.brands tbody tr:hover {
+  background: var(--surface-sunken);
+}
+.b-name {
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  white-space: nowrap;
+}
+.b-size {
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-base);
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.b-sys {
+  display: inline-block;
+  margin-left: var(--sp-2);
+  font-size: 0.66rem;
+  color: var(--text-soft);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.02em;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 1px 6px;
+  vertical-align: middle;
+}
+.b-note {
+  color: var(--text-soft);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+/* ---- 空状態（globals .empty-state を踏襲・既存クラス互換の .empty） ---- */
+.empty {
+  text-align: center;
+  padding: var(--sp-12) var(--sp-4) var(--sp-6);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+  color: var(--text-dim);
+}
+.empty .empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text-dim);
+}
+.empty p {
+  margin: 0;
+  max-width: 32ch;
+  font-size: var(--fs-sm);
+}
+
+/* ---- 注意書き ---- */
+.disclaimer {
+  margin-top: var(--sp-6);
+  border-top: 1px dashed var(--border-strong);
+  padding-top: var(--sp-4);
+}
+.disclaimer p {
+  margin: var(--sp-2) 0;
+  font-size: var(--fs-xs);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+/* ---- 使い方 / データについて（読み物セクション） ---- */
+.about {
+  margin-top: var(--sp-16);
+}
+.about .card-grid {
+  margin-top: var(--sp-6);
+}
+.about .step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-sm);
+  background: var(--accent-tint);
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: var(--sp-1);
+}
+
+/* ===== レスポンシブ ===== */
+@media (max-width: 560px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .std-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .cm-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .cm-input {
+    width: 100%;
+  }
+  .brands th,
+  .brands td {
+    padding: var(--sp-3) var(--sp-3);
+  }
+}
+
+/* reduced-motion: 結果のスライドインも停止 */
+@media (prefers-reduced-motion: reduce) {
+  .result {
+    animation: none !important;
+  }
+}

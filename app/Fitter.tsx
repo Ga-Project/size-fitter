@@ -226,7 +226,25 @@ export default function Fitter() {
             </p>
           )}
           <div className="std">
-            <span className="std-cap">標準サイズ表記（目安）</span>
+            <span className="std-cap">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m21 16-4 4-4-4" />
+                <path d="M17 20V4" />
+                <path d="m3 8 4-4 4 4" />
+                <path d="M7 4v16" />
+              </svg>
+              標準サイズ表記（目安）
+            </span>
             <div className="std-grid">
               {(["jp", "us", "eu", "uk"] as const).map((reg) => (
                 <div className="std-cell" key={reg}>
@@ -236,11 +254,15 @@ export default function Fitter() {
               ))}
             </div>
             <span className="std-cm">
-              基準 {metric.label}: 約 {result.matchedCm}
-              {metric.unit}
+              基準 {metric.label}: 約{" "}
+              <strong>
+                {result.matchedCm}
+                {metric.unit}
+              </strong>
             </span>
           </div>
 
+          <p className="brands-cap">ブランド別の推奨サイズ</p>
           <table className="brands">
             <thead>
               <tr>
@@ -264,11 +286,31 @@ export default function Fitter() {
           </table>
         </div>
       ) : (
-        <p className="empty">
-          {mode === "measure"
-            ? `${metric.label}を入力すると、各ブランドの推奨サイズが表示されます。`
-            : "手持ちのブランドとサイズを選ぶと、他ブランドの推奨サイズに逆引きします。"}
-        </p>
+        <div className="empty">
+          <span className="empty-icon" aria-hidden="true">
+            <svg
+              width="26"
+              height="26"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21.3 8.7 8.7 21.3a1 1 0 0 1-1.4 0l-4.6-4.6a1 1 0 0 1 0-1.4L15.3 2.7a1 1 0 0 1 1.4 0l4.6 4.6a1 1 0 0 1 0 1.4Z" />
+              <path d="m7.5 10.5 2 2" />
+              <path d="m10.5 7.5 2 2" />
+              <path d="m13.5 4.5 2 2" />
+              <path d="m4.5 13.5 2 2" />
+            </svg>
+          </span>
+          <p>
+            {mode === "measure"
+              ? `${metric.label}を入力すると、各ブランドの推奨サイズが一覧で表示されます。`
+              : "手持ちのブランドとサイズを選ぶと、他ブランドの推奨サイズに逆引きします。"}
+          </p>
+        </div>
       )}
 
       <div className="disclaimer">
