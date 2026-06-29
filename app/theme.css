@@ -3,23 +3,23 @@
  * globals.css は共通の構造・a11y・コンポーネント挙動を持つ "出発点"。
  * このファイルは globals.css の後に読み込まれ、:root トークンを上書きして
  * 製品固有の個性（色・温度感・形・密度・タイポ）を与え、さらにこの製品専用の
- * コンポーネント（セグメント切替・寸法入力・標準サイズグリッド・ブランド表）を足す。
+ * 画面構成（誌面マストヘッド・カバー・採寸スプレッド・比較スケール・ブランド索引）を足す。
  *
- * ■ この製品の世界観
- *   「ファッション／リテールの洗練・モダンでクリーン・信頼できる採寸」。
- *   ルックブックやアトリエの採寸チャートのような、静かで上質・精密な印象。
- *   → クールなアイボリー/スレートの紙地 ＋ 落ち着いたインク・デニムブルーの差し色 ＋
- *     控えめな角丸（仕立てられた構造感）＋ 見出しに上品なセリフ（エディトリアル）。
- *   汎用 bootstrap 青ではなく、彩度を抑えた "藍／デニム" の確かな青で信頼を表す。
+ * ■ この製品の世界観 — 「ファッション・ルックブック／採寸の誌面」
+ *   汎用の hero＋フォーム＋結果リストではなく、エディトリアル誌面として組む。
+ *   上質なセリフ見出し・たっぷりの余白・薄い罫線・段組み。中心は「サイズの見開き」＝
+ *   基準寸法の物差しに沿って四地域の表記を視覚化した比較スケールと、誌面索引としての
+ *   ブランド逆引き。操作は誌面の「余白（サイドバー）」に縦罫で寄せる。
+ *   彩度を抑えた "藍／デニム" の青で、採寸の確かさ・精度を表す。
  *
  * ■ アクセシビリティ（出荷前検証済み・全て WCAG AA 以上）
- *   light: accent vs white 6.78 / accent vs bg 6.69 / std値 accent vs tint 6.11 /
+ *   light: accent vs white 6.78 / accent vs bg 6.69 / accent vs tint 6.11 /
  *          text-dim vs bg 5.54 / text-soft vs bg 8.84 / text vs bg 16.2
  *   dark : accent vs bg 6.73 / accent-fg vs accent 6.67 / text-dim vs bg 7.21 / text vs bg 16.1
- *   システム表記バッジ（US/EU/UK/JP）は中立面＋text-soft で対比 8.8 以上。
+ *   地域タグ・索引系（US/EU/UK/JP）は中立面＋text-soft で対比 8.8 以上。
  *
- * ■ 思想: 構造クラス（.btn / .card / .hero / .badge …）の見た目は個別に
- *   書き換えず、トークンで個性を出す。この製品固有の UI だけを下で定義する。
+ * ■ 思想: 構造クラス（.btn / .input / .field …）の見た目は個別に書き換えず、
+ *   個性はトークンで出す。この製品固有の誌面 UI だけを下で定義する。
  */
 
 :root {
@@ -41,13 +41,13 @@
   --radius-xl: 24px;
   --density: 1;
 
-  /* ===== タイポ: 見出しのみ上品なセリフ（エディトリアル／ルックブックの香り）。
+  /* ===== タイポ: 見出しは上品なセリフ（エディトリアル／ルックブックの香り）。
      本文はクリーンなサンスのまま読みやすさを保つ。 ===== */
   --font-display:
     "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", "Times New Roman",
     serif;
 
-  /* ===== 製品固有: 標準サイズグリッドの強調枠（accent を帯びた淡い面） ===== */
+  /* ===== 製品固有: 比較スケールの目盛り罫（accent を帯びた淡い線） ===== */
   --measure-line: hsl(var(--accent-h) 30% 78%);
 }
 
@@ -58,192 +58,573 @@
 }
 
 /* =========================================================================
- * 製品固有コンポーネント
- *   構造（.btn/.card/.field/.input 等）は globals に従う。ここではこの
- *   ツール特有の UI（セグメント切替・寸法スライダー・標準グリッド・ブランド表・
- *   状態表示）だけを、上のトークンに連動する形で定義する。
+ * 誌面レイアウト容器
+ *   読み物として組むため、共通 .container より少しだけ広い誌面幅にする。
  * ========================================================================= */
-
-/* ---- ページ容器（globals の .container と別に、ツール本体は読み物幅に絞る） ---- */
-.page {
+.lb {
   width: 100%;
-  max-width: 60rem;
+  max-width: 64rem;
   margin-inline: auto;
   padding-inline: var(--sp-6);
 }
-.tool {
-  width: 100%;
-  max-width: 46rem;
-  margin-inline: auto;
+
+/* =========================================================================
+ * マストヘッド（誌面のロゴ帯）— sticky header ではなく、上端に置く題字。
+ *   薄い二重罫で仕切り、誌名・スローガン・目次を一列に。
+ * ========================================================================= */
+.masthead {
+  border-bottom: 1px solid var(--border);
+  padding-block: var(--sp-4);
+  background: var(--bg);
+}
+.masthead .lb {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--sp-3) var(--sp-6);
+}
+.masthead-title {
+  font-family: var(--font-display);
+  font-weight: var(--fw-black);
+  font-size: var(--fs-md);
+  letter-spacing: 0.16em;
+  color: var(--text);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.masthead-amp {
+  color: var(--accent);
+  margin-inline: 0.1em;
+}
+.masthead-strap {
+  margin: 0;
+  font-size: var(--fs-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: var(--fw-semibold);
+}
+.masthead-nav {
+  margin-left: auto;
+  display: flex;
+  gap: var(--sp-5);
+}
+.masthead-nav a {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text-soft);
+  text-decoration: none;
+  padding-block: var(--sp-2); /* タッチ高さ確保 */
+}
+.masthead-nav a:hover {
+  color: var(--accent);
 }
 
-/* ---- hero 内のミニ・サイズチップ（世界観の装飾＝US/EU/UK/JP の対比を見せる） ---- */
-.hero-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-2);
-  margin-top: var(--sp-6);
-}
-.hero-chip {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--sp-2);
-  padding: var(--sp-2) var(--sp-4);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
-  box-shadow: var(--shadow-xs);
+/* 誌面の小ラベル（号数・章の見出し）— eyebrow とは別の "活字組" 表現 */
+.folio {
+  font-family: var(--font-display);
+  font-style: italic;
   font-size: var(--fs-sm);
+  color: var(--accent);
+  letter-spacing: 0.01em;
+  margin: 0;
 }
-.hero-chip .hero-chip-region {
+
+/* =========================================================================
+ * カバー（表紙）— hero バンドではなく、非対称の二段組タイトル。
+ *   左に大判セリフ見出し、右にデック（前文）と特徴のクレジット。
+ * ========================================================================= */
+.cover {
+  padding-block: clamp(var(--sp-12), 8vw, var(--sp-24)) var(--sp-12);
+  border-bottom: 1px solid var(--border);
+}
+.cover-inner {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: clamp(var(--sp-6), 5vw, var(--sp-16));
+  align-items: end;
+}
+.cover-lede .folio {
+  margin-bottom: var(--sp-4);
+}
+.cover-head {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: clamp(2.4rem, 6.5vw, 4.4rem);
+  line-height: 1.04;
+  letter-spacing: var(--tracking-tight);
+  margin: 0;
+  text-wrap: balance;
+}
+.cover-head-em {
+  font-style: italic;
+  color: var(--accent);
+}
+.cover-deck {
+  padding-bottom: var(--sp-2);
+  border-left: 2px solid var(--measure-line);
+  padding-left: var(--sp-5);
+}
+.cover-deck p {
+  margin: 0;
+  font-size: var(--fs-md);
+  line-height: 1.55;
+  color: var(--text-soft);
+}
+.cover-credits {
+  list-style: none;
+  margin: var(--sp-5) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.cover-credits li {
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  padding-left: var(--sp-5);
+  position: relative;
+}
+.cover-credits li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+}
+
+/* =========================================================================
+ * 採寸スプレッド（見開き）— 左=操作の余白、右=比較プレート。
+ *   2 カラムを縦罫で仕切る誌面のグリッド。スプレッド自体が画面の主役。
+ * ========================================================================= */
+.spread {
+  padding-block: var(--sp-16);
+}
+.fit {
+  display: grid;
+  grid-template-columns: 17rem 1fr;
+  gap: 0;
+  align-items: start;
+}
+
+/* ---- 左：操作の余白（縦罫で本体と仕切る） ---- */
+.fit-margin {
+  border: 0;
+  padding: 0 var(--sp-8) 0 0;
+  margin: 0;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-8);
+}
+.fit-margin-folio {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.picklist {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.picklist legend {
+  padding: 0;
   font-size: var(--fs-xs);
   font-weight: var(--fw-bold);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  color: var(--accent);
-}
-.hero-chip .hero-chip-value {
-  font-weight: var(--fw-bold);
-  font-variant-numeric: tabular-nums;
-}
-
-/* hero の信頼バッジ（無料・登録不要・ブラウザ内） */
-.hero-trust {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-4);
-  margin-top: var(--sp-6);
-  font-size: var(--fs-sm);
   color: var(--text-dim);
-}
-.hero-trust span {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sp-2);
-}
-.hero-trust svg {
-  color: var(--accent);
-  flex-shrink: 0;
+  margin-bottom: var(--sp-3);
 }
 
-/* ---- セグメント切替（カテゴリ・入力方法のタブ） ---- */
-.seg {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: var(--sp-1);
-  padding: var(--sp-1);
-  background: var(--surface-sunken);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-.seg-2 {
+/* カテゴリ：目次風の縦リスト（誌面のコンテンツ一覧の体） */
+.picklist-items {
   display: flex;
+  flex-direction: column;
+}
+.pick {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
   width: 100%;
-}
-.seg-2 .seg-btn {
-  flex: 1;
-}
-.seg-btn {
-  appearance: none;
-  border: 1px solid transparent;
+  text-align: left;
   background: transparent;
+  border: 0;
+  border-top: 1px solid var(--border);
+  padding: var(--sp-3) 0;
+  min-height: 44px;
+  font: inherit;
   color: var(--text-soft);
-  padding: var(--sp-2) var(--sp-4);
-  min-height: 40px;
+  cursor: pointer;
+  transition: color var(--transition);
+}
+.picklist-items .pick:last-child {
+  border-bottom: 1px solid var(--border);
+}
+.pick-rule {
+  width: 1.6rem;
+  height: 2px;
+  background: var(--border-strong);
+  flex-shrink: 0;
+  transition:
+    width var(--transition),
+    background var(--transition);
+}
+.pick-label {
+  font-size: var(--fs-base);
+  font-weight: var(--fw-medium);
+}
+.pick:hover {
+  color: var(--text);
+}
+.pick:hover .pick-rule {
+  background: var(--accent);
+}
+.pick.is-active {
+  color: var(--accent);
+}
+.pick.is-active .pick-label {
+  font-weight: var(--fw-bold);
+}
+.pick.is-active .pick-rule {
+  width: 2.6rem;
+  height: 3px;
+  background: var(--accent);
+}
+
+/* モード切替：縦並びの 2 ボタン（誌面の小見出しトグル） */
+.mode-switch {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.mode-btn {
+  appearance: none;
+  background: var(--surface);
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-soft);
+  padding: var(--sp-3) var(--sp-4);
+  min-height: 44px;
   font: inherit;
   font-size: var(--fs-sm);
   font-weight: var(--fw-medium);
+  text-align: left;
   cursor: pointer;
-  white-space: nowrap;
   transition:
     background var(--transition),
-    color var(--transition),
-    box-shadow var(--transition);
+    color var(--transition);
 }
-.seg-btn:hover:not(.is-active) {
-  color: var(--text);
+.mode-switch .mode-btn:last-child {
+  border-bottom: 0;
+}
+.mode-btn:hover:not(.is-active) {
   background: var(--surface-2);
+  color: var(--text);
 }
-.seg-btn.is-active {
-  background: var(--surface);
-  color: var(--accent);
+.mode-btn.is-active {
+  background: var(--accent);
+  color: var(--accent-fg);
   font-weight: var(--fw-semibold);
-  box-shadow: var(--shadow-xs);
-  border-color: var(--border);
 }
 
-/* ---- フィールド微調整（globals .field を踏襲・ラベル名互換） ---- */
-.field-label {
-  display: block;
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-semibold);
-  color: var(--text-soft);
+/* 入力本体（余白に置く採寸エントリ） */
+.entry {
+  display: flex;
+  flex-direction: column;
+}
+.entry-label {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-dim);
   margin-bottom: var(--sp-2);
 }
-.tool .field {
-  margin-bottom: var(--sp-6);
-}
-.grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--sp-4);
-}
-
-/* ---- 寸法入力（数値 + スライダー） ---- */
-.cm-row {
+.entry-num {
   display: flex;
-  align-items: center;
-  gap: var(--sp-4);
+  align-items: baseline;
+  gap: var(--sp-2);
+  border-bottom: 2px solid var(--border-strong);
+  transition: border-color var(--transition);
+}
+.entry-num:focus-within {
+  border-color: var(--accent);
 }
 .cm-input {
-  width: 9rem;
-  font-size: var(--fs-md);
-  font-weight: var(--fw-semibold);
-  font-variant-numeric: tabular-nums;
-  padding: var(--sp-3) var(--sp-4);
+  flex: 1;
+  width: 100%;
+  appearance: none;
+  -moz-appearance: textfield;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: var(--sp-2) 0;
   min-height: 48px;
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
   color: var(--text);
-  background: var(--surface-sunken);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  transition:
-    border-color var(--transition),
-    box-shadow var(--transition),
-    background var(--transition);
-}
-.cm-input:hover {
-  border-color: var(--border-strong);
+  line-height: 1;
 }
 .cm-input:focus {
   outline: none;
-  border-color: var(--accent);
-  background: var(--bg);
-  box-shadow: 0 0 0 3px var(--accent-ring);
+  box-shadow: none;
+}
+.cm-input::-webkit-outer-spin-button,
+.cm-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.entry-unit {
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+  color: var(--text-dim);
 }
 .cm-range {
-  flex: 1;
+  width: 100%;
+  margin-top: var(--sp-4);
   accent-color: var(--accent);
   min-height: 44px;
   cursor: pointer;
 }
-.select {
+.entry-help {
+  margin: var(--sp-3) 0 0;
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+.entry .select {
   width: 100%;
 }
-.help {
-  color: var(--text-dim);
-  font-size: var(--fs-xs);
-  margin: var(--sp-2) 0 0;
+
+/* =========================================================================
+ * 右：比較プレート（誌面の主役・サイズの見開き）
+ * ========================================================================= */
+.plate {
+  padding-left: var(--sp-8);
+  min-width: 0;
+}
+.plate-warn {
+  display: flex;
+  gap: var(--sp-2);
+  background: var(--warn-tint);
+  color: var(--warn);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  margin: 0 0 var(--sp-6);
 }
 
-/* ---- 結果ブロック ---- */
-.result {
-  margin-top: var(--sp-2);
-  border-top: 1px solid var(--border);
-  padding-top: var(--sp-6);
-  animation: result-in var(--transition-slow) var(--ease);
+/* ---- 比較スケール：基準寸法の物差しに沿って matchedCm を立てる ---- */
+.scale {
+  margin-bottom: var(--sp-12);
+  animation: plate-in var(--transition-slow) var(--ease);
 }
-@keyframes result-in {
+.scale-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-6);
+}
+.scale-cap {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.scale-anchor {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  color: var(--accent);
+}
+.scale-track {
+  position: relative;
+  height: 2.5rem;
+}
+.scale-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  background: var(--measure-line);
+}
+.scale-tick {
+  position: absolute;
+  top: 50%;
+  width: 1px;
+  height: 10px;
+  margin-top: -5px;
+  background: var(--border-strong);
+  transform: translateX(-0.5px);
+}
+.scale-pin {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+}
+.scale-pin-dot {
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--bg);
+  box-shadow: var(--shadow-accent);
+}
+.scale-ends {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--sp-2);
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+}
+
+/* ---- 四地域の表記を大判で並べる（見開きプレート） ---- */
+.regions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 0 0 var(--sp-12);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.region {
+  margin: 0;
+  padding: var(--sp-5) var(--sp-3);
+  text-align: center;
+  border-left: 1px solid var(--border);
+}
+.region:first-child {
+  border-left: 0;
+}
+.region-tag {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: var(--sp-3);
+}
+.region-val {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, var(--fs-2xl));
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  line-height: 1;
+}
+
+/* ---- ブランド逆引き索引（leader dots を伴う誌面のインデックス） ---- */
+.index-cap {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--fs-md);
+  color: var(--text);
+  margin: 0 0 var(--sp-5);
+}
+.index-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.index-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  column-gap: var(--sp-3);
+  padding: var(--sp-4) 0;
+  border-top: 1px solid var(--border);
+}
+.index-list .index-row:last-child {
+  border-bottom: 1px solid var(--border);
+}
+.index-name {
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-md);
+  color: var(--text);
+}
+.index-dots {
+  border-bottom: 1px dotted var(--border-strong);
+  transform: translateY(-0.25em);
+}
+.index-size {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-md);
+  color: var(--accent);
+  white-space: nowrap;
+}
+.index-sys {
+  display: inline-block;
+  margin-left: var(--sp-2);
+  font-family: var(--font-sans);
+  font-size: 0.66rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.02em;
+  color: var(--text-soft);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 1px 6px;
+  vertical-align: middle;
+}
+.index-note {
+  grid-column: 1 / -1;
+  margin-top: var(--sp-2);
+  font-size: var(--fs-sm);
+  line-height: 1.55;
+  color: var(--text-soft);
+}
+
+/* ---- 空状態（プレートが未だ広がっていない誌面） ---- */
+.plate-empty {
+  padding: var(--sp-8) 0 var(--sp-12);
+}
+.plate-empty-rule {
+  display: block;
+  width: 3rem;
+  height: 3px;
+  background: var(--accent);
+  margin-bottom: var(--sp-5);
+}
+.plate-empty p {
+  margin: 0;
+  max-width: 42ch;
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  line-height: 1.5;
+  color: var(--text-soft);
+}
+
+/* ---- プレート脚注（注意書き） ---- */
+.plate-foot {
+  margin-top: var(--sp-12);
+  border-top: 1px dashed var(--border-strong);
+  padding-top: var(--sp-4);
+}
+.plate-foot p {
+  margin: var(--sp-2) 0;
+  font-size: var(--fs-xs);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+@keyframes plate-in {
   from {
     opacity: 0;
     transform: translateY(6px);
@@ -254,254 +635,113 @@
   }
 }
 
-/* clamped 警告（globals .alert-warn 相当をこの製品の文脈で） */
-.warn {
-  display: flex;
-  gap: var(--sp-3);
-  align-items: flex-start;
-  background: var(--warn-tint);
-  color: var(--warn);
-  padding: var(--sp-3) var(--sp-4);
-  border-radius: var(--radius-sm);
-  font-size: var(--fs-sm);
-  margin: 0 0 var(--sp-5);
+/* =========================================================================
+ * コロフォン（奥付）— 番号付きの段組みノート（card-grid ではなく罫線の段組み）
+ * ========================================================================= */
+.colophon {
+  border-top: 1px solid var(--border);
+  padding-block: var(--sp-16);
 }
-
-/* ---- 標準サイズグリッド（この製品の主役・"採寸チャート" の見せ場） ---- */
-.std {
-  position: relative;
-  background:
-    linear-gradient(
-      180deg,
-      var(--accent-tint),
-      hsl(var(--accent-h) calc(var(--accent-s) - 16%) 97%)
-    );
-  border: 1px solid var(--measure-line);
-  border-radius: var(--radius);
-  padding: var(--sp-5);
-  margin-bottom: var(--sp-6);
+.colophon > .lb > .folio {
+  margin-bottom: var(--sp-8);
 }
-@media (prefers-color-scheme: dark) {
-  .std {
-    background: var(--accent-tint);
-  }
-}
-.std-cap {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-bold);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: var(--sp-4);
-}
-.std-grid {
+.colophon-cols {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--sp-3);
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-8);
 }
-.std-cell {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: var(--sp-3) var(--sp-2);
-  text-align: center;
-  box-shadow: var(--shadow-xs);
-}
-.std-region {
-  display: block;
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-bold);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  color: var(--text-dim);
-  margin-bottom: var(--sp-1);
-}
-.std-value {
-  display: block;
-  font-family: var(--font-display);
-  font-size: var(--fs-lg);
-  font-weight: var(--fw-bold);
-  font-variant-numeric: tabular-nums;
-  color: var(--text);
-  line-height: 1.1;
-}
-.std-cm {
-  display: block;
-  margin-top: var(--sp-4);
-  font-size: var(--fs-sm);
-  color: var(--text-soft);
-  font-variant-numeric: tabular-nums;
-}
-.std-cm strong {
-  color: var(--accent);
-  font-weight: var(--fw-bold);
-}
-
-/* ---- ブランド逆引き表 ---- */
-.brands-cap {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-bold);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  color: var(--text-dim);
-  margin-bottom: var(--sp-3);
-}
-.brands {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: var(--fs-sm);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-}
-.brands th,
-.brands td {
-  text-align: left;
-  padding: var(--sp-3) var(--sp-4);
-  border-bottom: 1px solid var(--border);
-  vertical-align: top;
-}
-.brands thead th {
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-bold);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  color: var(--text-dim);
-  background: var(--surface-2);
-}
-.brands tbody tr:last-child td {
-  border-bottom: none;
-}
-.brands tbody tr {
-  transition: background var(--transition);
-}
-.brands tbody tr:hover {
-  background: var(--surface-sunken);
-}
-.b-name {
-  font-weight: var(--fw-semibold);
-  color: var(--text);
-  white-space: nowrap;
-}
-.b-size {
-  font-weight: var(--fw-bold);
-  font-size: var(--fs-base);
-  font-variant-numeric: tabular-nums;
-  color: var(--accent);
-  white-space: nowrap;
-}
-.b-sys {
-  display: inline-block;
-  margin-left: var(--sp-2);
-  font-size: 0.66rem;
-  color: var(--text-soft);
-  font-weight: var(--fw-bold);
-  letter-spacing: 0.02em;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  padding: 1px 6px;
-  vertical-align: middle;
-}
-.b-note {
-  color: var(--text-soft);
-  font-size: var(--fs-sm);
-  line-height: 1.5;
-}
-
-/* ---- 空状態（globals .empty-state を踏襲・既存クラス互換の .empty） ---- */
-.empty {
-  text-align: center;
-  padding: var(--sp-12) var(--sp-4) var(--sp-6);
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sp-3);
-  color: var(--text-dim);
-}
-.empty .empty-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 3.25rem;
-  height: 3.25rem;
-  border-radius: var(--radius);
-  background: var(--surface-2);
-  color: var(--text-dim);
-}
-.empty p {
-  margin: 0;
-  max-width: 32ch;
-  font-size: var(--fs-sm);
-}
-
-/* ---- 注意書き ---- */
-.disclaimer {
-  margin-top: var(--sp-6);
-  border-top: 1px dashed var(--border-strong);
+.note {
+  border-top: 2px solid var(--text);
   padding-top: var(--sp-4);
 }
-.disclaimer p {
-  margin: var(--sp-2) 0;
-  font-size: var(--fs-xs);
-  line-height: 1.6;
-  color: var(--text-dim);
-}
-
-/* ---- 使い方 / データについて（読み物セクション） ---- */
-.about {
-  margin-top: var(--sp-16);
-}
-.about .card-grid {
-  margin-top: var(--sp-6);
-}
-.about .step-num {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: var(--radius-sm);
-  background: var(--accent-tint);
-  color: var(--accent);
+.note-no {
   font-family: var(--font-display);
+  font-size: var(--fs-md);
   font-weight: var(--fw-bold);
   font-variant-numeric: tabular-nums;
-  margin-bottom: var(--sp-1);
+  color: var(--accent);
+}
+.note h2 {
+  margin: var(--sp-2) 0 var(--sp-3);
+  font-size: var(--fs-md);
+  line-height: 1.25;
+}
+.note p {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.65;
+  color: var(--text-soft);
 }
 
-/* ===== レスポンシブ ===== */
-@media (max-width: 560px) {
-  .grid-2 {
+/* =========================================================================
+ * フッター（誌面の裾）
+ * ========================================================================= */
+.lb-footer {
+  border-top: 1px solid var(--border);
+  padding-block: var(--sp-8);
+  color: var(--text-dim);
+  font-size: var(--fs-xs);
+}
+.lb-footer p {
+  margin: var(--sp-2) 0;
+  line-height: 1.6;
+}
+
+/* =========================================================================
+ * レスポンシブ — 見開きを縦に畳む。誌面の段組みも 1 列へ。
+ * ========================================================================= */
+@media (max-width: 860px) {
+  .cover-inner {
+    grid-template-columns: 1fr;
+    align-items: start;
+    gap: var(--sp-8);
+  }
+  .colophon-cols {
+    grid-template-columns: 1fr;
+    gap: var(--sp-12);
+  }
+}
+
+@media (max-width: 720px) {
+  .fit {
     grid-template-columns: 1fr;
   }
-  .std-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .fit-margin {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 0 0 var(--sp-8) 0;
+    margin-bottom: var(--sp-8);
   }
-  .cm-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .cm-input {
-    width: 100%;
-  }
-  .brands th,
-  .brands td {
-    padding: var(--sp-3) var(--sp-3);
+  .plate {
+    padding-left: 0;
   }
 }
 
-/* reduced-motion: 結果のスライドインも停止 */
+@media (max-width: 560px) {
+  .masthead-nav {
+    margin-left: 0;
+    width: 100%;
+  }
+  .regions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .region:nth-child(3) {
+    border-left: 0;
+  }
+  .region:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--border);
+  }
+  .index-row {
+    grid-template-columns: 1fr auto;
+  }
+  .index-dots {
+    display: none;
+  }
+}
+
+/* reduced-motion: プレートのスライドインを停止 */
 @media (prefers-reduced-motion: reduce) {
-  .result {
+  .scale {
     animation: none !important;
   }
 }

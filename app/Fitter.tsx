@@ -94,67 +94,86 @@ export default function Fitter() {
   if (!cat) return null;
   const metric = cat.metric;
 
+  // 比較プレートの目盛り位置（基準寸法の最小〜最大を 0〜100% に写像）。
+  // matchedCm の位置にアンカーを立て、誌面の「サイズ・スケール」を描く。
+  const lo = cat.rows[0]?.cm ?? metric.min;
+  const hi = cat.rows[cat.rows.length - 1]?.cm ?? metric.max;
+  const span = hi - lo || 1;
+  const pct = (cm: number) => ((cm - lo) / span) * 100;
+  const anchorPct = result ? Math.max(0, Math.min(100, pct(result.matchedCm))) : null;
+
   return (
-    <div className="card">
-      {/* カテゴリ */}
-      <div className="field">
-        <label className="field-label">カテゴリ</label>
-        <div className="seg" role="tablist" aria-label="カテゴリ">
-          {CATEGORIES.map((c) => (
+    <div className="fit">
+      {/* ===== 左：操作の余白（誌面サイドバー：縦罫で本体と仕切る） ===== */}
+      <aside className="fit-margin" aria-label="採寸の指定">
+        <p className="fit-margin-folio">採寸条件</p>
+
+        {/* カテゴリ：縦並びの目次風リスト */}
+        <fieldset className="picklist">
+          <legend>カテゴリ</legend>
+          <div role="tablist" aria-label="カテゴリ" className="picklist-items">
+            {CATEGORIES.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                role="tab"
+                aria-selected={c.id === categoryId}
+                className={"pick" + (c.id === categoryId ? " is-active" : "")}
+                onClick={() => setCategoryId(c.id)}
+              >
+                <span className="pick-rule" aria-hidden="true" />
+                <span className="pick-label">{c.label}</span>
+              </button>
+            ))}
+          </div>
+        </fieldset>
+
+        {/* モード切替 */}
+        <fieldset className="picklist">
+          <legend>入力方法</legend>
+          <div className="mode-switch" role="group" aria-label="入力方法">
             <button
-              key={c.id}
               type="button"
-              role="tab"
-              aria-selected={c.id === categoryId}
-              className={"seg-btn" + (c.id === categoryId ? " is-active" : "")}
-              onClick={() => setCategoryId(c.id)}
+              aria-pressed={mode === "measure"}
+              className={"mode-btn" + (mode === "measure" ? " is-active" : "")}
+              onClick={() => setMode("measure")}
             >
-              {c.label}
+              実寸（{metric.label}）
             </button>
-          ))}
-        </div>
-      </div>
+            <button
+              type="button"
+              aria-pressed={mode === "brand"}
+              className={"mode-btn" + (mode === "brand" ? " is-active" : "")}
+              onClick={() => setMode("brand")}
+            >
+              手持ちブランド
+            </button>
+          </div>
+        </fieldset>
 
-      {/* モード */}
-      <div className="field">
-        <label className="field-label">入力方法</label>
-        <div className="seg seg-2">
-          <button
-            type="button"
-            className={"seg-btn" + (mode === "measure" ? " is-active" : "")}
-            onClick={() => setMode("measure")}
-          >
-            実寸（{metric.label}）から
-          </button>
-          <button
-            type="button"
-            className={"seg-btn" + (mode === "brand" ? " is-active" : "")}
-            onClick={() => setMode("brand")}
-          >
-            手持ちブランドから
-          </button>
-        </div>
-      </div>
-
-      {/* 入力本体 */}
-      {mode === "measure" ? (
-        <div className="field">
-          <label className="field-label" htmlFor="cm">
-            {metric.label}（{metric.unit}）
-          </label>
-          <div className="cm-row">
-            <input
-              id="cm"
-              type="number"
-              inputMode="decimal"
-              className="cm-input"
-              placeholder={`${metric.label}を入力`}
-              min={metric.min}
-              max={metric.max}
-              step={metric.step}
-              value={cmInput}
-              onChange={(e) => setCmInput(e.target.value)}
-            />
+        {/* 入力本体 */}
+        {mode === "measure" ? (
+          <div className="entry">
+            <label className="entry-label" htmlFor="cm">
+              {metric.label}（{metric.unit}）
+            </label>
+            <div className="entry-num">
+              <input
+                id="cm"
+                type="number"
+                inputMode="decimal"
+                className="cm-input"
+                placeholder="00.0"
+                min={metric.min}
+                max={metric.max}
+                step={metric.step}
+                value={cmInput}
+                onChange={(e) => setCmInput(e.target.value)}
+              />
+              <span className="entry-unit" aria-hidden="true">
+                {metric.unit}
+              </span>
+            </div>
             <input
               type="range"
               className="cm-range"
@@ -173,13 +192,11 @@ export default function Fitter() {
               )}
               onChange={(e) => setCmInput(e.target.value)}
             />
+            <p className="entry-help">{metric.help}</p>
           </div>
-          <p className="help">{metric.help}</p>
-        </div>
-      ) : (
-        <div className="field grid-2">
-          <div>
-            <label className="field-label" htmlFor="brand">
+        ) : (
+          <div className="entry">
+            <label className="entry-label" htmlFor="brand">
               ブランド
             </label>
             <select
@@ -194,9 +211,11 @@ export default function Fitter() {
                 </option>
               ))}
             </select>
-          </div>
-          <div>
-            <label className="field-label" htmlFor="size">
+            <label
+              className="entry-label"
+              htmlFor="size"
+              style={{ marginTop: "var(--sp-4)" }}
+            >
               手持ちのサイズ
             </label>
             <select
@@ -212,117 +231,115 @@ export default function Fitter() {
               ))}
             </select>
           </div>
-        </div>
-      )}
+        )}
+      </aside>
 
-      {/* 結果 */}
-      {result ? (
-        <div className="result">
-          {result.clamped && (
-            <p className="warn">
-              対応範囲（{metric.min}〜{metric.max}
-              {metric.unit}
-              ）の外です。最も近いサイズを目安として表示しています。
-            </p>
-          )}
-          <div className="std">
-            <span className="std-cap">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
+      {/* ===== 右：比較プレート（誌面の主役・サイズの見開き） ===== */}
+      <div className="plate" aria-live="polite">
+        {result ? (
+          <>
+            {result.clamped && (
+              <p className="plate-warn">
+                対応範囲（{metric.min}〜{metric.max}
+                {metric.unit}）の外です。最も近いサイズを目安として表示しています。
+              </p>
+            )}
+
+            {/* 比較スケール：基準寸法の物差しに沿って matchedCm を立てる */}
+            <div className="scale">
+              <div className="scale-head">
+                <span className="scale-cap">サイズ・スケール</span>
+                <span className="scale-anchor tabular">
+                  {result.matchedCm}
+                  {metric.unit}
+                </span>
+              </div>
+              <div
+                className="scale-track"
+                role="img"
+                aria-label={`基準${metric.label}は約${result.matchedCm}${metric.unit}。範囲${metric.min}から${metric.max}${metric.unit}。`}
               >
-                <path d="m21 16-4 4-4-4" />
-                <path d="M17 20V4" />
-                <path d="m3 8 4-4 4 4" />
-                <path d="M7 4v16" />
-              </svg>
-              標準サイズ表記（目安）
-            </span>
-            <div className="std-grid">
+                <div className="scale-line" aria-hidden="true" />
+                {cat.rows.map((r) => (
+                  <span
+                    key={r.cm}
+                    className="scale-tick"
+                    style={{ left: `${pct(r.cm)}%` }}
+                    aria-hidden="true"
+                  />
+                ))}
+                {anchorPct != null && (
+                  <span
+                    className="scale-pin"
+                    style={{ left: `${anchorPct}%` }}
+                    aria-hidden="true"
+                  >
+                    <span className="scale-pin-dot" />
+                  </span>
+                )}
+              </div>
+              <div className="scale-ends" aria-hidden="true">
+                <span className="tabular">
+                  {lo}
+                  {metric.unit}
+                </span>
+                <span className="tabular">
+                  {hi}
+                  {metric.unit}
+                </span>
+              </div>
+            </div>
+
+            {/* 四地域の表記を見開きの大判で並べる（誌面プレート） */}
+            <dl className="regions">
               {(["jp", "us", "eu", "uk"] as const).map((reg) => (
-                <div className="std-cell" key={reg}>
-                  <span className="std-region">{REGION_LABELS[reg]}</span>
-                  <span className="std-value">{result.standard[reg]}</span>
+                <div className="region" key={reg}>
+                  <dt className="region-tag">{REGION_LABELS[reg]}</dt>
+                  <dd className="region-val">{result.standard[reg]}</dd>
                 </div>
               ))}
-            </div>
-            <span className="std-cm">
-              基準 {metric.label}: 約{" "}
-              <strong>
-                {result.matchedCm}
-                {metric.unit}
-              </strong>
-            </span>
-          </div>
+            </dl>
 
-          <p className="brands-cap">ブランド別の推奨サイズ</p>
-          <table className="brands">
-            <thead>
-              <tr>
-                <th>ブランド</th>
-                <th>推奨サイズ</th>
-                <th>フィット傾向（目安）</th>
-              </tr>
-            </thead>
-            <tbody>
-              {result.brands.map((b) => (
-                <tr key={b.id}>
-                  <td className="b-name">{b.name}</td>
-                  <td className="b-size">
-                    {b.label}
-                    <span className="b-sys">{REGION_LABELS[b.system]}</span>
-                  </td>
-                  <td className="b-note">{b.note}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <div className="empty">
-          <span className="empty-icon" aria-hidden="true">
-            <svg
-              width="26"
-              height="26"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.75"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M21.3 8.7 8.7 21.3a1 1 0 0 1-1.4 0l-4.6-4.6a1 1 0 0 1 0-1.4L15.3 2.7a1 1 0 0 1 1.4 0l4.6 4.6a1 1 0 0 1 0 1.4Z" />
-              <path d="m7.5 10.5 2 2" />
-              <path d="m10.5 7.5 2 2" />
-              <path d="m13.5 4.5 2 2" />
-              <path d="m4.5 13.5 2 2" />
-            </svg>
-          </span>
+            {/* ブランド逆引きを誌面の「索引」として段組みリストで */}
+            <div className="index">
+              <p className="index-cap">ブランド別 推奨サイズ — Index</p>
+              <ul className="index-list">
+                {result.brands.map((b) => (
+                  <li className="index-row" key={b.id}>
+                    <span className="index-name">{b.name}</span>
+                    <span className="index-dots" aria-hidden="true" />
+                    <span className="index-size tabular">
+                      {b.label}
+                      <span className="index-sys">{REGION_LABELS[b.system]}</span>
+                    </span>
+                    <span className="index-note">{b.note}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </>
+        ) : (
+          <div className="plate-empty">
+            <span className="plate-empty-rule" aria-hidden="true" />
+            <p>
+              {mode === "measure"
+                ? `${metric.label}を入力すると、基準寸法に合わせた四地域の表記とブランド別の推奨サイズが、ここに見開きで広がります。`
+                : "手持ちのブランドとサイズを指定すると、同じ寸法を四地域の表記とほかのブランドへ逆引きします。"}
+            </p>
+          </div>
+        )}
+
+        <div className="plate-foot">
           <p>
-            {mode === "measure"
-              ? `${metric.label}を入力すると、各ブランドの推奨サイズが一覧で表示されます。`
-              : "手持ちのブランドとサイズを選ぶと、他ブランドの推奨サイズに逆引きします。"}
+            ※ サイズはあくまで<strong>目安</strong>
+            です。同じブランドでもモデルにより異なります。最終的に各ブランドの
+            <strong>公式サイズチャート</strong>を必ずご確認ください。
+          </p>
+          <p>
+            ※ 本サイトは各ブランドと<strong>提携・公認関係はありません</strong>。
+            ブランド名は識別目的の事実記述です。
           </p>
         </div>
-      )}
-
-      <div className="disclaimer">
-        <p>
-          ※ サイズはあくまで<strong>目安</strong>
-          です。同じブランドでもモデルにより異なります。 最終的に各ブランドの
-          <strong>公式サイズチャート</strong>を必ずご確認ください。
-        </p>
-        <p>
-          ※ 本サイトは各ブランドと<strong>提携・公認関係はありません</strong>。
-          ブランド名は識別目的の事実記述です。
-        </p>
       </div>
     </div>
   );

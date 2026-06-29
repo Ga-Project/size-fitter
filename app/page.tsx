@@ -3,169 +3,104 @@ import Fitter from "./Fitter";
 export default function Home() {
   return (
     <>
-      <a href="#tool" className="skip-link">
+      <a href="#spread" className="skip-link">
         本文へスキップ
       </a>
 
-      <header className="site-header">
-        <div className="page">
-          <a className="brand" href="/">
-            <span className="brand-mark" aria-hidden="true">
-              ⇄
-            </span>
-            <span>SizeFitter</span>
+      {/* ===== マストヘッド（誌面のロゴ帯・薄い罫線で仕切る） ===== */}
+      <header className="masthead">
+        <div className="lb">
+          <a className="masthead-title" href="/">
+            SIZE<span className="masthead-amp">·</span>FITTER
           </a>
-          <a className="btn btn-ghost" href="#about">
-            使い方
-          </a>
+          <p className="masthead-strap">
+            US · EU · UK · JP — 国際サイズ対応表
+          </p>
+          <nav className="masthead-nav" aria-label="目次">
+            <a href="#spread">採寸</a>
+            <a href="#colophon">注記</a>
+          </nav>
         </div>
       </header>
 
       <main>
-        {/* ===== hero ===== */}
-        <section className="hero">
-          <div className="page">
-            <span className="eyebrow">US · EU · UK · JP サイズ換算</span>
-            <h1>
-              手持ちの一足から、
-              <br />
-              <span className="accent-text">世界基準</span>のサイズへ。
-            </h1>
-            <p className="hero-lead">
-              いつもの靴・服のブランドとサイズ、または実寸（cm）を入れるだけ。
-              海外主要ブランドの推奨サイズを、4 つの地域表記でなめらかに逆引きします。
-            </p>
-
-            <div className="hero-chips" aria-hidden="true">
-              <span className="hero-chip">
-                <span className="hero-chip-region">JP</span>
-                <span className="hero-chip-value tabular">27.0</span>
-              </span>
-              <span className="hero-chip">
-                <span className="hero-chip-region">US</span>
-                <span className="hero-chip-value tabular">9</span>
-              </span>
-              <span className="hero-chip">
-                <span className="hero-chip-region">EU</span>
-                <span className="hero-chip-value tabular">42.5</span>
-              </span>
-              <span className="hero-chip">
-                <span className="hero-chip-region">UK</span>
-                <span className="hero-chip-value tabular">8.5</span>
-              </span>
+        {/* ===== カバー（誌面表紙：左に大判タイトル、右にリード）===== */}
+        <section className="cover">
+          <div className="lb cover-inner">
+            <div className="cover-lede">
+              <span className="folio">No. 01 — Fitting Guide</span>
+              <h1 className="cover-head">
+                ひとつの足から、
+                <span className="cover-head-em">世界中の表記</span>
+                へ。
+              </h1>
             </div>
-
-            <div className="hero-trust">
-              <span>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M20 6 9 17l-5-5" />
-                </svg>
-                完全ブラウザ内で完結
-              </span>
-              <span>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M20 6 9 17l-5-5" />
-                </svg>
-                登録不要・無料
-              </span>
-              <span>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M20 6 9 17l-5-5" />
-                </svg>
-                送信・トラッキングなし
-              </span>
+            <div className="cover-deck">
+              <p>
+                手持ちの靴・服のブランドとサイズ、あるいは実寸（cm）を一つ。
+                それだけで、海外主要ブランドの推奨サイズを四つの地域表記で逆引きします。
+              </p>
+              <ul className="cover-credits" aria-label="特徴">
+                <li>ブラウザ内で完結</li>
+                <li>登録不要・無料</li>
+                <li>送信・追跡なし</li>
+              </ul>
             </div>
           </div>
         </section>
 
-        {/* ===== tool ===== */}
-        <section className="page section" id="tool" style={{ paddingTop: 0 }}>
-          <div className="tool">
+        {/* ===== 採寸スプレッド（誌面の見開き：左=操作余白、右=比較プレート）===== */}
+        <section id="spread" className="spread">
+          <div className="lb">
             <Fitter />
           </div>
         </section>
 
-        {/* ===== about ===== */}
-        <section className="page about" id="about">
-          <div className="tool">
-            <span className="eyebrow">使い方</span>
-            <h2>3 ステップで逆引き完了</h2>
-            <div className="card-grid">
-              <div className="card">
-                <span className="step-num tabular" aria-hidden="true">
-                  1
+        {/* ===== コロフォン（奥付：番号付きの段組みノート）===== */}
+        <section id="colophon" className="colophon">
+          <div className="lb">
+            <p className="folio">Colophon — 使い方とデータ</p>
+            <div className="colophon-cols">
+              <article className="note">
+                <span className="note-no" aria-hidden="true">
+                  01
                 </span>
-                <h3>カテゴリを選ぶ</h3>
+                <h2>採寸の手順</h2>
                 <p>
-                  靴（メンズ／レディース）やトップスなど、調べたいカテゴリを切り替えます。
+                  カテゴリを選び、実寸（cm）を入れるか、いま持っているブランドとサイズを指定します。
+                  比較プレートに四地域の表記がそろい、各ブランドの推奨サイズが一覧で続きます。
                 </p>
-              </div>
-              <div className="card">
-                <span className="step-num tabular" aria-hidden="true">
-                  2
+              </article>
+              <article className="note">
+                <span className="note-no" aria-hidden="true">
+                  02
                 </span>
-                <h3>実寸 or 手持ちを入力</h3>
+                <h2>逆引きの読み方</h2>
                 <p>
-                  足長やバストの cm を入れるか、いま持っているブランドとサイズを選びます。
+                  比較プレートの目盛りは基準寸法（足長・胸囲）の軸です。四地域の表記は同じ寸法を別の物差しで言い換えたもの。ブランド索引は印字系（US/EU/UK/JP）とフィット傾向の参考を併記します。
                 </p>
-              </div>
-              <div className="card">
-                <span className="step-num tabular" aria-hidden="true">
-                  3
+              </article>
+              <article className="note">
+                <span className="note-no" aria-hidden="true">
+                  03
                 </span>
-                <h3>推奨サイズを一覧で</h3>
+                <h2>データについて</h2>
                 <p>
-                  各ブランドの推奨サイズと、大きめ・小さめのフィット傾向がそろって表示されます。
+                  標準換算は JIS / Mondopoint
+                  など一般的な対応を自社で構造化した目安値です。各ブランド公式チャートの転載ではありません。フィット傾向は一般に言われる参考情報で、最終確認は各公式チャートで行ってください。
                 </p>
-              </div>
+              </article>
             </div>
-
-            <h2>データについて</h2>
-            <p className="hero-lead" style={{ maxWidth: "60ch" }}>
-              標準換算は JIS / Mondopoint
-              など一般的なサイズ対応を自社で構造化した目安値で、各ブランドの公式サイズチャートの画像等を転載したものではありません。
-              フィット傾向は一般的に言われる傾向の参考情報です。実測・最終確認は各公式チャートで行ってください。
-            </p>
           </div>
         </section>
       </main>
 
-      <footer className="site-footer">
-        <div className="page">
+      <footer className="lb-footer">
+        <div className="lb">
           <p>
             入力内容はブラウザ内にのみ保存され、サーバーには送信されません。外部トラッキングは行っていません。
           </p>
-          <p style={{ marginTop: "var(--sp-2)" }}>
+          <p>
             ブランド名は識別目的の事実記述で、各ブランドとの提携・公認関係はありません。
           </p>
         </div>
